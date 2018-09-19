@@ -1,0 +1,114 @@
+<?php
+
+namespace Tracy; ?>
+<style>
+    #tracy-debug-panel-Routes-info table{font:9pt/1.5 Consolas,monospace}
+    #tracy-debug-panel-Routes-info tr.Yes td{color:green}
+    #tracy-debug-panel-Routes-info .may td{color:#67F}
+    #tracy-debug-panel-Routes-info pre,#tracy-debug-panel-Routes-info code{display:inline}
+    #tracy-debug-panel-Routes-info code .nette-collapsed{display:none}
+    #tracy-debug tr.Yes{
+        color:green;
+    }
+
+    #tracy-debug tr.No{
+        color:maroon;
+    }
+    #tracy-debug tr.May{
+        color:lightseagreen;
+    }
+
+</style>
+<div class="nette-RoutingPanel">
+    <h1>Routes</span>
+        <?php $info = 'no match'; ?>
+        <?php if (empty($this->router->getRoutes())): ?>
+            no routes
+        <?php else: ?>
+            <?php $currentRoute = $request->getAttribute('route'); ?>
+        <?php endif ?>
+    </h1>
+
+    <div class="nette-inner">
+        <?php //var_dump($this->request); die(); ?>
+        <p><code><?php // echo htmlSpecialChars('[' . $this->request->getAttribute('route')->getMethods() . '] ' . $this->router->getUri())     ?></code></p>
+
+        <?php if (empty($this->router->getRoutes())): ?>
+            <p>No routes defined.</p>
+
+        <?php else: ?>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Matched?</th>
+                        <th>Pattern</th>
+                        <th>HttpMethods</th>
+                        <th>Name</th>
+                        <th>Handler</th>
+                        <th>Params</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php $alreadyMatched = false; ?>
+                    <?php foreach ($this->router->getRoutes() as $route): ?>
+                        <?php
+                        if ($route === $currentRoute)
+                        {
+                            $match          = $alreadyMatched
+                                    ? 'May'
+                                    : 'Yes';
+                            $alreadyMatched = TRUE;
+                        } else
+                        {
+                            $match = 'No';
+                        }
+                        ?>
+                        <tr class="<?php echo $match ?>">
+                            <td><?php echo $match ?></td>
+                            <td><code><?= htmlSpecialChars($route->getPattern()) ?></code></td>
+                            <td><code><?= implode('<br />', $route->getMethods()) ?></code></td>
+                            <td><code><?= $route->getName() ?></code></td>
+                            <td>
+                                <code>
+                                    <?php
+                                    $callable = $route->getCallable();
+                                    ?>
+                                    <?php if (is_string($callable)) : ?>
+                                        <?= $callable ?>
+                                    <?php elseif (is_array($callable)): ?>
+                                        <?php
+                                        $object = $callable[0];
+                                        $action = $callable[1];
+                                        //                                 var_dump($object);
+                                        $info   = new \ReflectionClass($object);
+                                        ?>
+                                        <?= $info->getName(); ?>:<?= $action ?>
+                                    <?php else: ?>
+                                        <?php {
+                                            $info = new \ReflectionFunction($callable);
+                                        }
+                                        ?>
+                                        <?= $info->getName() ?>
+                                        (<?= $info->getFileName() ?>:
+                                        <?= $info->getStartLine() ?>)
+                                    <?php endif; ?>
+                                </code>
+                            </td>
+                            <td>
+                                <?php $args = $route->getArguments(); ?>
+                                <?php foreach ($args as $k => $v): ?>
+                                    <?= $k ?>: <?= $v ?><br />
+                                <?php endforeach; ?>
+                            </td>
+
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+
+        <?php endif ?>
+
+
+    </div>
+</div>

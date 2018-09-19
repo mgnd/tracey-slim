@@ -1,0 +1,21 @@
+<?php namespace Tracy; ?>
+<div class="nette-RequestPanel">
+    <h1>View</h1>
+    <p>File: ~<?= $this->shortenPath($this->view->getPath()) ?></p>
+    <div class="nette-inner">
+        <?= Dumper::toHtml($this->view->getParams(), array(Dumper::COLLAPSE => FALSE)) ?>
+    </div>
+    <?php if ($this->view->subviews): ?>
+    <div class="nette-inner" style="padding-top:1em;">
+        <h1>Subviews</h1>
+        <?php foreach ($this->view->subviews as $sub): ?>
+            <p>File: ~<?= $this->shortenPath($sub->getPath()) ?></p>
+            <?= Dumper::toHtml(
+                    $sub->getParams(),
+                    [
+                                    Dumper::COLLAPSE => TRUE
+                    ]) ?>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</div>
